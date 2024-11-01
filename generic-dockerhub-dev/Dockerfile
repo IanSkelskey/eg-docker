@@ -12,7 +12,7 @@ RUN useradd user -m -s /bin/bash
 RUN useradd opensrf -m -s /bin/bash
 RUN useradd evergreen -m -s /bin/bash
 RUN apt-get update
-ENV DEBIAN_FRONTEND noninteractive
+ENV DEBIAN_FRONTEND=noninteractive
 ENV TZ=America/New_York
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 RUN apt-get update && apt-get install -y --no-install-recommends apt-utils
@@ -51,6 +51,6 @@ ADD vars.yml /egconfigs/vars.yml
 ADD install_evergreen.yml /egconfigs/install_evergreen.yml
 ADD evergreen_restart_services.yml /egconfigs/evergreen_restart_services.yml
 ADD restart_post_boot.yml /egconfigs/restart_post_boot.yml
-RUN cd /egconfigs && ansible-playbook install_evergreen.yml -v
-ENTRYPOINT cd /egconfigs && ansible-playbook evergreen_restart_services.yml -vvvv && while true; do sleep 1; done
+RUN cd /egconfigs && ansible-playbook install_evergreen.yml -vvvv
+ENTRYPOINT ["sh", "-c", "cd /egconfigs && ansible-playbook evergreen_restart_services.yml -vvvv && while true; do sleep 1; done"]
 #ENTRYPOINT while true; do sleep 1; done
