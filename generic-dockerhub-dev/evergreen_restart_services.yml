@@ -305,6 +305,20 @@
     shell: cd /home/opensrf/repos/Evergreen-build && make install && chown -R opensrf:opensrf {{openils_path}}
     when: install_xul_client|bool == false
 
+  - name: Check /openils/var/web/css folder for existing symlink
+    become: true
+    stat:
+      path: "/openils/var/web/css"
+    register: css_symcheck
+  - name: Delete /openils/var/web/css if it's not a symlink
+    become: true
+    ignore_errors: yes
+    file:
+      path: "/openils/var/web/css"
+      state: absent
+    when: css_symcheck is defined and (css_symcheck.stat.islnk is not defined or css_symcheck.stat.islnk == false)
+
+
 ### Setup EG concerto database
   - name: Setup concerto database
     become: true
@@ -707,6 +721,16 @@
       state: link
       src: "/home/opensrf/repos/Evergreen-build/Open-ILS/web/eg2"
       dest: "{{openils_path}}/var/web/eg2"
+  
+  - name: Create /openils/var/web/css Symlink
+    become: true
+    become_user: opensrf
+    ignore_errors: yes
+  file:
+    force: yes
+    state: link
+    src: "/home/opensrf/repos/Evergreen/Open-ILS/web/css"
+    dest: "/openils/var/web/css"
 
 ## /usr/local/share/perl/5.34.0/OpenILS
   - name: Check /usr/local/share/perl/5.34.0/OpenILS folder for existing symlink
